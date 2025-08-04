@@ -1,0 +1,47 @@
+﻿@page "/"
+@using Frontend.Models
+@using System.Globalization
+@using Frontend.Clients
+
+<PageTitle>Trucks</PageTitle>
+
+<table class="table table-striped table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Model</th>
+            <th>Brand</th>
+            <th>Max speed</th>
+            <th>Max lifting capacity</th>
+            <th class="text-center">Price</th>
+            <th>Release Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var truck in trucklist)
+        {
+            <tr class="">
+                <td>@truck.Id</td>
+                <td>@truck.Model</td>
+                <td>@truck.Brand</td>
+                <td>@truck.maxSpeed</td>
+                <td>@truck.maxLiftingCapacity</td>
+                <td class="text-center">@truck.Price.ToString("C3", us)</td>
+                <td>@truck.ReleaseDate</td>
+                <td></td>
+            </tr>    
+        }
+    </tbody>
+</table>
+
+@code {
+    List<AllTruck> trucklist = new List<AllTruck>();
+
+    CultureInfo us = new CultureInfo("en-US");
+
+    protected override async Task OnInitializedAsync()
+    {
+        trucklist = await TruckClients.GetAllTrucksAsync();
+    }
+}
