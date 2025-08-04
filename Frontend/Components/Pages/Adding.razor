@@ -1,0 +1,66 @@
+﻿@page "/add"
+@inject NavigationManager Navigation
+
+<PageTitle>Add Truck</PageTitle>
+<h3>Add new Truck</h3>
+
+<div class="row">
+    <div class="col-md-6"> 
+        <EditForm Model = "@truck" FormName="Adding" OnSubmit="HandleSubmit">
+            <div class="mb-3">
+                <label for="Model" class="form-label">Model: </label>
+                <InputText id="Model" @bind-Value="truck.Model" class="form-control" />  
+            </div>
+            <div class="mb-3">
+                <label for="Brand" class="form-label">Brand: </label>
+                <InputSelect id="Brand" @bind-Value="truck.BrandId" class="form-select">
+                    <option value="">Select a Brand</option>
+                    @foreach(var brand in brandlist)
+                    {
+                        <option value="@brand.Id">@brand.BrandName</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-3">
+                <label for="maxSpeed" class="form-label">Max Speed: </label>
+                <InputNumber id="maxSpeed" @bind-Value="truck.maxSpeed" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="maxLiftingCapacity" class="form-label">Lifting capacity: </label>
+                <InputNumber id="maxLiftingCapacity" @bind-Value="truck.maxLiftingCapacity" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="Price" class="form-label">Price: </label>
+                <InputNumber id="Price" @bind-Value="truck.Price" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="ReleaseDate" class="form-label">Release Date: </label>
+                <InputDate id="ReleaseDate" @bind-Value="truck.ReleaseDate" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit changes</button>
+            <a role="button" class="btn btn-secondary" href="/">Cancel</a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private TruckDetails truck { get; set; } = new()
+    {
+        Model = string.Empty,
+        ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow)
+    };
+
+    List<BrandDetails> brandlist = new List<BrandDetails>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        brandlist = await BrandClients.GetAllBrandAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        await TruckClients.AddTruck(truck);
+        Navigation.NavigateTo("/");
+    }
+}   
