@@ -11,7 +11,7 @@ namespace Frontend.Clients
                 {
                     Id = 1,
                     Model = "1",
-                    Brand = "Mercedes",
+                    Brand = "Scania",
                     maxSpeed = 120,
                     maxLiftingCapacity = 40,
                     Price = 40000,
@@ -58,10 +58,7 @@ namespace Frontend.Clients
 
         public static async Task AddTruck(TruckDetails truck)
         {
-            await GetAllBrand();
-
-            ArgumentException.ThrowIfNullOrWhiteSpace(truck.BrandId);
-            var brand = brands.Single(b => b.Id == int.Parse(truck.BrandId));
+            BrandDetails brand = await GetBrandDetailsAsync(truck.BrandId);
 
             var AllTruck = new AllTruck
             {
@@ -76,6 +73,46 @@ namespace Frontend.Clients
             };
 
             truckslist.Add(AllTruck);
+        }
+        private static async Task<BrandDetails> GetBrandDetailsAsync(string? id)
+        {
+            await GetAllBrand();
+
+            ArgumentException.ThrowIfNullOrWhiteSpace(id);
+            return brands.Single(b => b.Id == int.Parse(id));
+        }
+
+        public static async Task<TruckDetails> GetTruck(int? id)
+        {
+            var truck = truckslist.Find(x => x.Id == id);
+            await GetAllBrand();
+            BrandDetails brand = brands.Single(x => string.Equals(x.BrandName, truck.Brand, StringComparison.OrdinalIgnoreCase));
+
+            var truckdetails = new TruckDetails()
+            {
+                Id = truck.Id,
+                Model = truck.Model,
+                BrandId = brand.Id.ToString(),
+                maxSpeed = truck.maxSpeed,
+                maxLiftingCapacity= truck.maxLiftingCapacity,
+                Price = truck.Price,
+                ReleaseDate = truck.ReleaseDate,
+            };
+            return truckdetails;
+        }
+
+        public static async Task UpdateGame(TruckDetails updated)
+        {
+            BrandDetails brand = await GetBrandDetailsAsync(updated.BrandId);    
+            AllTruck truck = truckslist.Find(x => x.Id == updated.Id);
+
+            truck.Model = updated.Model;
+            truck.Brand = brand.BrandName;
+            truck.maxSpeed = updated.maxSpeed;
+            truck.maxLiftingCapacity = updated.maxLiftingCapacity;
+            truck.Price = updated.Price;
+            truck.ReleaseDate = updated.ReleaseDate;
+
         }
     }
 }

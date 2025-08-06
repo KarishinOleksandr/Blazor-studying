@@ -1,15 +1,19 @@
 ﻿@page "/add"
+@page "/add/{id:int}"
 @inject NavigationManager Navigation
 
-<PageTitle>Add Truck</PageTitle>
-<h3>Add new Truck</h3>
+<PageTitle>@title</PageTitle>
+<h3>@title</h3>
 
 <div class="row">
     <div class="col-md-6"> 
-        <EditForm Model = "@truck" FormName="Adding" OnSubmit="HandleSubmit">
+        <EditForm Model = "@truck" FormName="Adding" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
             <div class="mb-3">
                 <label for="Model" class="form-label">Model: </label>
-                <InputText id="Model" @bind-Value="truck.Model" class="form-control" />  
+                <InputText id="Model" @bind-Value="truck.Model" class="form-control" /> 
+                <ValidationMessage For="() => truck.Model" />
             </div>
             <div class="mb-3">
                 <label for="Brand" class="form-label">Brand: </label>
@@ -20,22 +24,27 @@
                         <option value="@brand.Id">@brand.BrandName</option>
                     }
                 </InputSelect>
+                <ValidationMessage For="() => truck.BrandId" />
             </div>
             <div class="mb-3">
                 <label for="maxSpeed" class="form-label">Max Speed: </label>
                 <InputNumber id="maxSpeed" @bind-Value="truck.maxSpeed" class="form-control" />
+                <ValidationMessage For="() => truck.maxSpeed" />
             </div>
             <div class="mb-3">
                 <label for="maxLiftingCapacity" class="form-label">Lifting capacity: </label>
                 <InputNumber id="maxLiftingCapacity" @bind-Value="truck.maxLiftingCapacity" class="form-control" />
+                <ValidationMessage For="() => truck.maxLiftingCapacity" />
             </div>
             <div class="mb-3">
                 <label for="Price" class="form-label">Price: </label>
                 <InputNumber id="Price" @bind-Value="truck.Price" class="form-control" />
+                <ValidationMessage For="() => truck.Price" />
             </div>
             <div class="mb-3">
                 <label for="ReleaseDate" class="form-label">Release Date: </label>
                 <InputDate id="ReleaseDate" @bind-Value="truck.ReleaseDate" class="form-control" />
+                <ValidationMessage For="() => truck.ReleaseDate" />
             </div>
             <button type="submit" class="btn btn-primary">Submit changes</button>
             <a role="button" class="btn btn-secondary" href="/">Cancel</a>
@@ -44,14 +53,36 @@
 </div>
 
 @code {
+    [Parameter]
+    public int? id { get; set; }
+
     [SupplyParameterFromForm]
-    private TruckDetails truck { get; set; } = new()
-    {
-        Model = string.Empty,
-        ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow)
-    };
+    private TruckDetails? truck { get; set; }
 
     List<BrandDetails> brandlist = new List<BrandDetails>();
+
+    private string title = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (truck != null) return;
+
+        if(id != null)
+        {
+            truck = await TruckClients.GetTruck(id);
+            title = $"Edit {truck.Model}";
+        }
+        else
+        {
+            truck = new()
+            {
+                Model = string.Empty,
+                ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            };
+
+            title = "Add new Truck";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,7 +91,15 @@
 
     private async Task HandleSubmit()
     {
-        await TruckClients.AddTruck(truck);
+        if (id == null)
+        {
+            await TruckClients.AddTruck(truck);
+        }
+        else
+        {
+            truck.Id = id.Value;
+            await TruckClients.UpdateGame(truck);
+        }
         Navigation.NavigateTo("/");
     }
 }   
