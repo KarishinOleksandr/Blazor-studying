@@ -26,7 +26,12 @@
                 <td>@truck.maxLiftingCapacity</td>
                 <td class="text-center">@truck.Price.ToString("C3", us)</td>
                 <td>@truck.ReleaseDate</td>
-                <td></td>
+                <td>
+                    <div>
+                        <a class="btn btn-primary" role="button" href="/add/@truck.Id"><i class="bi bi-pencil-square"></i></a>
+                        <a class="btn btn-danger" role="button" href="/delete/@truck.Id"><i class="bi bi-trash"></i></a>
+                    </div>
+                </td>
             </tr>    
         }
     </tbody>

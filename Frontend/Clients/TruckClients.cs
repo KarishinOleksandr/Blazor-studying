@@ -114,6 +114,14 @@ namespace Frontend.Clients
             truck.ReleaseDate = updated.ReleaseDate;
 
         }
+
+        public static async Task DeleteTruck(TruckDetails deletet)
+        {
+            var truck = truckslist.Find(x => x.Id == deletet.Id);
+            if (truck != null)
+                truckslist.Remove(truck);
+            await Task.CompletedTask;
+        }
     }
 }
     

@@ -1,0 +1,35 @@
+﻿@page "/delete/{id:int}"
+@inject NavigationManager Navigation
+
+<PageTitle>@title</PageTitle>
+
+<h3>Delete</h3>
+
+<button type="button" class="btn btn-primary" @onclick="HandleSubmit">Delete</button>
+
+@code {
+    [Parameter]
+    public int? id { get; set; }
+
+    public TruckDetails? truck { get; set; }
+
+    private string title = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(id != null){
+            truck = await TruckClients.GetTruck(id);
+            title = $"Delete {truck.Model}";
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if(id != null)
+        {
+            truck.Id = id.Value;
+            await TruckClients.DeleteTruck(truck);
+        }
+        Navigation.NavigateTo("/");
+    }
+}
