@@ -1,13 +1,21 @@
 ﻿@page "/add"
 @page "/add/{id:int}"
 @inject NavigationManager Navigation
+@rendermode InteractiveServer 
+@inject TruckClients TruckClient
+@inject BrandClients BrandClient
 
 <PageTitle>@title</PageTitle>
 <h3>@title</h3>
 
+@if (truck == null || brandlist == null)
+{
+    <h3>Loading...</h3>
+}
+else{
 <div class="row">
     <div class="col-md-6"> 
-        <EditForm Model = "@truck" FormName="Adding" OnValidSubmit="HandleSubmit">
+        <EditForm Model="@truck" FormName="Adding" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="mb-3">
@@ -21,7 +29,7 @@
                     <option value="">Select a Brand</option>
                     @foreach(var brand in brandlist)
                     {
-                        <option value="@brand.Id">@brand.BrandName</option>
+                        <option value="@brand.Id">@brand.Name</option>
                     }
                 </InputSelect>
                 <ValidationMessage For="() => truck.BrandId" />
@@ -51,6 +59,7 @@
         </EditForm>
     </div>
 </div>
+}
 
 @code {
     [Parameter]
@@ -65,11 +74,10 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (truck != null) return;
 
         if(id != null)
         {
-            truck = await TruckClients.GetTruck(id);
+            truck = await TruckClient.GetTruck(id);
             title = $"Edit {truck.Model}";
         }
         else
@@ -86,19 +94,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        brandlist = await BrandClients.GetAllBrandAsync();
+        brandlist = await BrandClient.GetAllBrandAsync();
     }
 
     private async Task HandleSubmit()
     {
         if (id == null)
         {
-            await TruckClients.AddTruck(truck);
+            await TruckClient.AddTruck(truck);
         }
         else
         {
             truck.Id = id.Value;
-            await TruckClients.UpdateGame(truck);
+            await TruckClient.UpdateGame(truck);
         }
         Navigation.NavigateTo("/");
     }

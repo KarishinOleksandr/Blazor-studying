@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Frontend.Convert;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Frontend.Models
 {
@@ -11,7 +13,9 @@ namespace Frontend.Models
         public required string Model { get; set; }
 
         [Required(ErrorMessage = "Brand's name is required")]
+        [JsonConverter(typeof(ConverterJson))]
         public string? BrandId { get; set; }
+        public string Brand { get; set; } = string.Empty;
 
         [Required]
         [Range(60, 180)]

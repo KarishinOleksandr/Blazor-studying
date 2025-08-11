@@ -1,11 +1,47 @@
 ﻿@page "/delete/{id:int}"
 @inject NavigationManager Navigation
+@rendermode InteractiveServer
+@inject TruckClients TruckClient
+@inject BrandClients BrandClient
 
 <PageTitle>@title</PageTitle>
 
-<h3>Delete</h3>
+@if (truck == null || brand == null)
+{
+    <h3>Loading...</h3>
+}
+else
+{
+        <h3>Deleting @truck.Model</h3>
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Brand</th>
+                <th>Max speed</th>
+                <th>Max lifting capacity</th>
+                <th class="text-center">Price</th>
+                <th>Release Date</th>
+            </tr>
+        </thead>
+        <tbody>
+                <tr class="">
+                    <td>@truck.Id</td>
+                    <td>@truck.Model</td>
+                    <td>@brand.Name</td>
+                    <td>@truck.maxSpeed</td>
+                    <td>@truck.maxLiftingCapacity</td>
+                    <td class="text-center">@truck.Price.ToString("C3", us)</td>
+                    <td>@truck.ReleaseDate</td>
+                </tr>
+        </tbody>
+    </table>
+    <h3>Are you sure you want to delete this truck from database?</h3>
 
-<button type="button" class="btn btn-primary" @onclick="HandleSubmit">Delete</button>
+    <button class="btn btn-primary" @onclick="Deleting">Delete</button>
+    <a type="button" class="btn btn-secondary" href="/">Cancel</a>
+}
 
 @code {
     [Parameter]
@@ -13,23 +49,31 @@
 
     public TruckDetails? truck { get; set; }
 
+    CultureInfo us = new CultureInfo("en-US");
+
+    List<BrandDetails> brands = new List<BrandDetails>();
+
+    public BrandDetails brand { get; set; }
+
     private string title = string.Empty;
 
     protected override async Task OnParametersSetAsync()
     {
         if(id != null){
-            truck = await TruckClients.GetTruck(id);
+            truck = await TruckClient.GetTruck(id);
             title = $"Delete {truck.Model}";
+            brands = await BrandClient.GetAllBrandAsync();
+            brand = brands.Find(b => b.Id == int.Parse(truck.BrandId));
         }
     }
 
-    private async Task HandleSubmit()
+    private async Task Deleting()
     {
         if(id != null)
         {
-            truck.Id = id.Value;
-            await TruckClients.DeleteTruck(truck);
+            await TruckClient.DeleteTruck(truck);
         }
         Navigation.NavigateTo("/");
     }
+
 }
